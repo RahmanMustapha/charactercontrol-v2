@@ -1,0 +1,17 @@
+* text=auto
+
+# Force LF for files where it matters
+*.py text eol=lf
+*.toml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf
+
+# Treat motion capture and binary recordings as binary (no line ending munging)
+*.bvh binary
+*.mvnx binary
+*.npz binary
+*.npy binary
+*.pkl binary
