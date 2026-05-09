@@ -5,7 +5,39 @@ build/
 dist/
 wheels/
 *.egg-info
-recordings/
+
 
 # Virtual environments
 .venv
+env/
+
+
+# Project-specific data
+recordings/
+*.bvh
+*.mvnx
+*.fbx
+
+
+# Secrets and local config
+.env
+.env.local
+*.local
+
+
+# OS metadata
+.DS_Store
+Thumbs.db
+desktop.ini
+
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+
+
+# Logs
+*.log
+logs/
