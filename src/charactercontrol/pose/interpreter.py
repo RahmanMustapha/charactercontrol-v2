@@ -30,7 +30,11 @@ class CalibrationBaseline:
     """
     standing_hip_height: float        # meters, world Z of pelvis at rest
     facing_yaw_offset: float          # degrees; subtract from torso yaw to get "0 = forward"
-
+    head_height: float                # meters, world Z of head at rest
+    floor_z: float                    # meters; average of foot Z at calibration
+    shoulder_width: float             # meters; distance between shoulders
+    arm_length: float                 # meters; shoulder to hand at rest, averaged
+    player_height: float              # meters; head_height - floor_z
 
 class PoseInterpreter:
     """
