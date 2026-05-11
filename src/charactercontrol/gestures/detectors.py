@@ -87,3 +87,64 @@ class LeanDetector:
             timestamp=state.timestamp,
             intensity=intensity,
         )]
+    
+import time as _time
+
+class JumpDetector:
+    """
+    Detects a physical jump-in-place by tracking hip rise above baseline.
+
+    Fires a START event on takeoff, then and END event after a short hold
+    duration, simulating a controller button tap. Includes a refractory 
+    period to prevent spurious re-fires from lanfing bobble.
+    """
+
+    #Hip must rise this many meters above baseline to trigger
+    DEFAULT_ON_THRESHOLD_M = 0.10
+    DEFAULT_OFF_THRESHOLD_M = 0.05
+    # How long the button stays "pressed" (START → END delay)
+    BUTTON_HOLD_SEC = 0.08
+    # No new jumps can fire within this window after the last one
+    REFRACTORY_SEC = 0.25
+
+    def __init__(
+        self,
+        on_threshold_m: float = DEFAULT_ON_THRESHOLD_M,
+        off_threshold_m: float = DEFAULT_OFF_THRESHOLD_M,
+    ) -> None:
+        self._gate = HysteresisGate(on_threshold_m, off_threshold_m)
+        self._last_jump_start: float = 0.0   # timestamp of the most recent START
+        self._pending_end: bool = False      # waiting to emit END
+
+    def update(self, state: BodyState) -> Iterable[GestureEvent]:
+        events: list[GestureEvent] = []
+        now = state.timestamp
+
+        # Emit END if we've passed the hold duration
+        if self._pending_end and (now - self._last_jump_start) >= self.BUTTON_HOLD_SEC:
+            events.append(GestureEvent(
+                kind=GestureKind.JUMP,
+                phase=EventPhase.END,
+                timestamp=now,
+                intensity=0.0,
+            ))
+            self._pending_end = False
+
+        was_engaged = self._gate.engaged
+        is_engaged = self._gate.update(state.hip_height_normalized)
+
+        # Fire START on rising edge, but only outside the refractory window
+        if is_engaged and not was_engaged:
+            time_since_last = now - self._last_jump_start
+            if time_since_last >= self.REFRACTORY_SEC:
+                self._last_jump_start = now
+                self._pending_end = True
+                events.append(GestureEvent(
+                    kind=GestureKind.JUMP,
+                    phase=EventPhase.START,
+                    timestamp=now,
+                    intensity=1.0,
+                ))
+
+
+        return events

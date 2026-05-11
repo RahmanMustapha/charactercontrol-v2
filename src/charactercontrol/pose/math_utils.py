@@ -67,3 +67,34 @@ def vec(p: tuple[float, float, float]) -> np.ndarray:
 def distance(a: tuple[float, float, float], b: tuple[float, float, float]) -> float:
     """Euclidean distance between two 3D points."""
     return float(np.linalg.norm(vec(a) - vec(b)))
+
+def quat_multiply(
+    q1: tuple[float, float, float, float],
+    q2: tuple[float, float, float, float],
+) -> tuple[float, float, float, float]:
+    """
+    Hamilton product of two quaternions in (w, x, y, z) form.
+    Result represents the rotation of q1 followed by q2.
+    """
+    w1, x1, y1, z1 = q1
+    w2, x2, y2, z2 = q2
+    return (
+        w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2,
+        w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2,
+        w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2,
+        w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2,
+    )
+
+
+def quat_yaw_only(yaw_deg: float) -> tuple[float, float, float, float]:
+    """Construct a quaternion representing rotation around Z axis only."""
+    half = math.radians(yaw_deg) * 0.5
+    return (math.cos(half), 0.0, 0.0, math.sin(half))
+
+
+def quat_conjugate(
+    q: tuple[float, float, float, float],
+) -> tuple[float, float, float, float]:
+    """Conjugate of a unit quaternion = its inverse rotation."""
+    w, x, y, z = q
+    return (w, -x, -y, -z)

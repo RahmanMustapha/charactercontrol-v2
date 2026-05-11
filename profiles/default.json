@@ -1,0 +1,20 @@
+{
+  "name": "default",
+  "description": "Minimal mapping: torso lean controls left analog stick.",
+  "analog": [
+    {
+      "source": "torso_lean_side",
+      "target": "left_stick_x",
+      "deadzone": 8.0,
+      "full_scale": 25.0
+    },
+    {
+      "source": "torso_lean_forward",
+      "target": "left_stick_y",
+      "deadzone": 8.0,
+      "full_scale": 25.0,
+      "invert": true
+    }
+  ],
+  "buttons": []
+}

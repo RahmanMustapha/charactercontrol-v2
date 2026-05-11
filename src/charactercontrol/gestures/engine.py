@@ -7,7 +7,7 @@ from typing import Iterable
 
 from charactercontrol.pose.types import BodyState
 from charactercontrol.gestures.events import GestureEvent
-from charactercontrol.gestures.detectors import LeanDetector
+from charactercontrol.gestures.detectors import LeanDetector, JumpDetector
 
 
 class GestureEngine:
@@ -17,11 +17,14 @@ class GestureEngine:
     """
 
     def __init__(self) -> None:
-        # For now, just lean. We'll add more detectors as we build them.
         self._lean = LeanDetector()
+        self._jump = JumpDetector()
+
 
     def update(self, state: BodyState) -> list[GestureEvent]:
         """Run all detectors and return aggregated events for this frame."""
         events: list[GestureEvent] = []
         events.extend(self._lean.update(state))
+        events.extend(self._jump.update(state))
+
         return events

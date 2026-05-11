@@ -1,0 +1,18 @@
+{
+  "name": "celeste",
+  "description": "Celeste profile: lateral movement via torso lean. Jump-in-place for A",
+  "analog": [
+    {
+      "source": "torso_lean_side",
+      "target": "left_stick_x",
+      "deadzone": 8.0,
+      "full_scale": 25.0
+    }
+  ],
+  "buttons": [
+    {
+        "gesture": "JUMP",
+        "button": "A"
+    }
+  ]
+}
