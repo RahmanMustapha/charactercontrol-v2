@@ -74,8 +74,22 @@ class PoseInterpreter:
         r_foot = pose.get(RIGHT_FOOT)
         l_foot = pose.get(LEFT_FOOT)
 
-        # ---- Torso orientation from upper-spine (T8) quaternion ----
-        yaw, pitch, roll = m.quat_to_euler_zyx(t8.quaternion)
+        # First, extract yaw in world frame (this is "which way the body is facing").
+        world_yaw, _, _ = m.quat_to_euler_zyx(t8.quaternion)
+
+        # Construct a yaw-only quaternion and conjugate it to "remove" facing direction.
+        # The remaining rotation is the body's pitch/roll in its own local frame.
+        yaw_only = m.quat_yaw_only(world_yaw)
+        yaw_inverse = m.quat_conjugate(yaw_only)
+        body_local_quat = m.quat_multiply(yaw_inverse, t8.quaternion)
+
+        # Now extract Euler angles from body-local quaternion.
+        # Yaw of this should be ~0; pitch and roll are pure body-relative tilt.
+        _, pitch, roll = m.quat_to_euler_zyx(body_local_quat)
+
+        # Keep `yaw` for facing logic below
+        yaw = world_yaw
+
 
         # Subtract calibration yaw offset if available, so 0 = "facing forward at calibration"
         if self._baseline is not None:

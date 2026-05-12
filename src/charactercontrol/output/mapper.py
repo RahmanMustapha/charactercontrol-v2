@@ -75,6 +75,28 @@ class GamepadMapper:
         self._gamepad.set_left_trigger(self._analog_state["left_trigger"])
         self._gamepad.set_right_trigger(self._analog_state["right_trigger"])
 
+        # ---- Orientation: facing direction × forward lean → analog ----
+        for mapping in self._profile.orientation:
+            # Direction component from facing angle
+            direction = _scale_with_deadzone(
+                state.torso_facing,
+                mapping.facing_deadzone,
+                mapping.facing_full_scale,
+            )
+            # Magnitude component from forward lean
+            magnitude = _scale_with_deadzone(
+                state.torso_lean_forward,
+                mapping.forward_deadzone,
+                mapping.forward_full_scale,
+            )
+            # Forward lean only counts in the positive direction (leaning back ≠ moving)
+            magnitude = max(0.0, magnitude)
+
+            output = direction * magnitude
+            if mapping.invert:
+                output = -output
+            self._analog_state[mapping.target] = output
+
         # ---- Buttons (from gesture events) ----
         for event in events:
             for button_map in self._profile.buttons:

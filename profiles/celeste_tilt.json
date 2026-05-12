@@ -1,6 +1,6 @@
 {
-  "name": "celeste",
-  "description": "Celeste profile: lateral movement via torso lean. Jump-in-place for A",
+  "name": "celeste_tilt",
+  "description": "Body tilt controls walk direction; facing is ignored.",
   "analog": [
     {
       "source": "torso_lean_side",

@@ -34,7 +34,28 @@ class ButtonMapping:
     gesture: str          # GestureKind name, e.g. "JUMP"
     button: str           # gamepad button name, e.g. "A"
 
+@dataclass
+class OrientationMapping:
+    """
+    Maps body facing direction combined with forward lean to an analog stick.
 
+    The stick's direction is set by `torso_facing`:
+        facing = 0°    → no horizontal stick output
+        facing = +90°  → stick fully right (or as configured)
+        facing = -90°  → stick fully left
+
+    The stick's magnitude is gated by forward lean: the user must lean forward
+    past `forward_deadzone` to commit to movement, scaled up to `forward_full_scale`.
+
+    Standing upright but facing sideways = stick neutral (intent without commit).
+    """
+    target: str                # gamepad target, e.g. "left_stick_x"
+    facing_deadzone: float     # facing angles within ±this produce no direction
+    facing_full_scale: float   # facing angles ≥ this produce full deflection
+    forward_deadzone: float    # forward lean below this produces no movement
+    forward_full_scale: float  # forward lean ≥ this produces full magnitude
+    invert: bool = False
+    
 @dataclass
 class Profile:
     """A complete control mapping for one game."""
@@ -42,6 +63,7 @@ class Profile:
     description: str
     analog: list[AnalogMapping] = field(default_factory=list)
     buttons: list[ButtonMapping] = field(default_factory=list)
+    orientation: list[OrientationMapping] = field(default_factory=list)
 
 
 def load_profile(path: Path) -> Profile:
@@ -54,10 +76,13 @@ def load_profile(path: Path) -> Profile:
     buttons = [
         ButtonMapping(**m) for m in data.get("buttons", [])
     ]
+    orientation = [OrientationMapping(**m) for m in data.get("orientation", [])]
 
     return Profile(
         name=data["name"],
         description=data.get("description", ""),
         analog=analog,
         buttons=buttons,
+        orientation=orientation,
     )
+
