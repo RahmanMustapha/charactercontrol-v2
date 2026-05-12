@@ -2,15 +2,18 @@
 Live body-as-controller play loop.
 Calibrates, then drives a virtual Xbox 360 controller from your motion.
 
-Run: uv run python scripts/play.py [profile_name]
+Run: uv run python scripts/play.py [profile_name] [--record [session_name]]
 Default profile: 'default'. Examples: 'celeste'.
 """
 
+import argparse
 import sys
 import time
 from pathlib import Path
+from typing import Optional
 
 from charactercontrol.sensors.xsens_receiver import XsensReceiver
+from charactercontrol.sensors.recorder import PoseRecorder
 from charactercontrol.pose.interpreter import PoseInterpreter
 from charactercontrol.pose.calibration import calibrate_with_retries, CalibrationError
 from charactercontrol.gestures.engine import GestureEngine
@@ -21,11 +24,21 @@ from charactercontrol.output.mapper import GamepadMapper
 
 UPDATE_HZ = 60
 PROFILE_DIR = Path(__file__).parent.parent / "profiles"
+RECORDINGS_DIR = Path(__file__).parent.parent / "recordings"
+
+
+def parse_args() -> argparse.Namespace:
+    p = argparse.ArgumentParser()
+    p.add_argument("profile", nargs="?", default="default", help="Profile name")
+    p.add_argument("--record", nargs="?", const="session", default=None,
+                   help="Record this session. Optionally provide a name.")
+    return p.parse_args()
 
 
 def main() -> None:
-    profile_name = sys.argv[1] if len(sys.argv) > 1 else "default"
-    profile_path = PROFILE_DIR / f"{profile_name}.json"
+    args = parse_args()
+
+    profile_path = PROFILE_DIR / f"{args.profile}.json"
     if not profile_path.exists():
         print(f"Profile not found: {profile_path}")
         return
@@ -50,6 +63,21 @@ def main() -> None:
         print(f"Could not calibrate: {e}")
         receiver.stop()
         return
+    
+    # Start recorder if requested
+    recorder: Optional[PoseRecorder] = None  # type: ignore
+    if args.record is not None:
+        stamp = time.strftime("%Y%m%d_%H%M%S")
+        filename = f"{args.record}_{stamp}.jsonl"
+        record_path = RECORDINGS_DIR / filename
+        recorder = PoseRecorder(
+            get_pose=receiver.get_latest,
+            output_path=record_path,
+            session_name=args.record,
+            baseline=baseline,
+        )
+        recorder.start()
+        print(f"Recording to: {record_path}")
 
     print("\nVirtual gamepad active. Lean to control. Ctrl+C to exit.")
     print("(Open joy.cpl to see live stick movement, or launch a game.)\n")
@@ -78,6 +106,9 @@ def main() -> None:
     except KeyboardInterrupt:
         print("\nShutting down...")
     finally:
+        if recorder is not None:
+            summary = recorder.stop()
+            print(f"Recording saved: {summary['samples_written']} samples → {summary['path']}")
         gamepad.reset()
         receiver.stop()
 
