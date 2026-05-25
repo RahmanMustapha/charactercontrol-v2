@@ -100,12 +100,12 @@ class JumpDetector:
     """
 
     #Hip must rise this many meters above baseline to trigger
-    DEFAULT_ON_THRESHOLD_M = 0.10
-    DEFAULT_OFF_THRESHOLD_M = 0.05
+    DEFAULT_ON_THRESHOLD_M = .07#0.10
+    DEFAULT_OFF_THRESHOLD_M = .03#0.05
     # How long the button stays "pressed" (START → END delay)
-    BUTTON_HOLD_SEC = 0.08
+    BUTTON_HOLD_SEC = .06#0.08
     # No new jumps can fire within this window after the last one
-    REFRACTORY_SEC = 0.25
+    REFRACTORY_SEC = .15#0.25
 
     def __init__(
         self,

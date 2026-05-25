@@ -26,7 +26,7 @@ class RecalRequest:
         self._flag.set()
 
     def consume(self) -> bool:
-        if self._flag.is_set():
+        if self._flag.is_set():  
             self._flag.clear()
             return True
         return False

@@ -1,0 +1,20 @@
+{
+  "name": "nsmb",
+  "description": "New Super Mario Bros. DS — orientation-based locomotion + jump.",
+  "analog": [],
+  "orientation": [
+    {
+      "target": "left_stick_x",
+      "facing_deadzone": 20.0,
+      "facing_full_scale": 60.0,
+      "forward_deadzone": 8.0,
+      "forward_full_scale": 20.0
+    }
+  ],
+  "buttons": [
+    {
+      "gesture": "JUMP",
+      "button": "A"
+    }
+  ]
+}
